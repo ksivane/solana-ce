@@ -18,9 +18,10 @@ pub struct GreetingAccount {
 
 #[derive(BorshSerialize, BorshDeserialize, Debug)]
 pub struct Params {
-    pub count: u32,
-    pub d_count: u32,
-    pub shout: [u8; 5],
+    pub supply: u64,
+    pub shipment: u32,
+    pub code: [u8; 3],
+    pub des: [u8; 16],
 }
 
 // Declare and export the program's entrypoint
@@ -52,6 +53,15 @@ pub fn process_instruction(
 
     let decoded_params = Params::try_from_slice(instruction_data).unwrap();
     msg!("Decoded data: {:?}", decoded_params);
+
+    let code = String::from_utf8(decoded_params.code.to_vec()).unwrap();
+    let des = String::from_utf8(decoded_params.des.to_vec()).unwrap();
+
+    msg!("Total supply: {}, Code: {}, Description: {}", decoded_params.supply, code, des);
+    msg!("Shipment: {}", decoded_params.shipment);
+
+
+    
     //msg!("Shout: {:?}", String::from(&(decoded_params.shout)));
 
     // let (instruction_byte, all_other_bytes) = instruction_data.split_first().unwrap();
