@@ -202,10 +202,27 @@ export async function checkProgram(): Promise<void> {
  */
 export async function sayHello(): Promise<void> {
   console.log('Saying hello to', greetedPubkey.toBase58());
+  let buf = Buffer.alloc(13);
+  buf[0] = 0;
+  buf[1] = 1;
+  buf[2] = 2;
+  buf[3] = 3;
+  buf[4] = 4;
+  buf[5] = 5;
+  buf[6] = 6;
+  buf[7] = 7;
+  buf[8] = 72;
+  buf[9] = 69;
+  buf[10] = 69;
+  buf[11] = 76;
+  buf[12] = 79;
+
+  //let buf = Buffer.from("Hello");
+
   const instruction = new TransactionInstruction({
     keys: [{pubkey: greetedPubkey, isSigner: false, isWritable: true}],
     programId,
-    data: Buffer.alloc(0), // All instructions are hellos
+    data: buf, //Buffer.alloc(8), // All instructions are hellos
   });
   await sendAndConfirmTransaction(
     connection,

@@ -16,6 +16,13 @@ pub struct GreetingAccount {
     pub d_counter: u32,
 }
 
+#[derive(BorshSerialize, BorshDeserialize, Debug)]
+pub struct Params {
+    pub count: u32,
+    pub d_count: u32,
+    pub shout: [u8; 5],
+}
+
 // Declare and export the program's entrypoint
 entrypoint!(process_instruction);
 
@@ -23,7 +30,7 @@ entrypoint!(process_instruction);
 pub fn process_instruction(
     program_id: &Pubkey, // Public key of the account the hello token program was loaded into
     accounts: &[AccountInfo], // The account to say hello to
-    _instruction_data: &[u8], // Ignored, all hellotoken instructions are hellos
+    instruction_data: &[u8], // Ignored, all hellotoken instructions are hellos
 ) -> ProgramResult {
     msg!("Hello Token Rust program entrypoint (1)");
 
@@ -38,6 +45,18 @@ pub fn process_instruction(
         msg!("Greeted account does not have the correct program id");
         return Err(ProgramError::IncorrectProgramId);
     }
+
+    // let decoded_params = String::try_from_slice(instruction_data).unwrap();
+    // msg!("Decoded data: {:?}", decoded_params);
+
+
+    let decoded_params = Params::try_from_slice(instruction_data).unwrap();
+    msg!("Decoded data: {:?}", decoded_params);
+    //msg!("Shout: {:?}", String::from(&(decoded_params.shout)));
+
+    // let (instruction_byte, all_other_bytes) = instruction_data.split_first().unwrap();
+    // msg!("Ins: {}", instruction_byte);
+
 
     // Increment and store the number of times the account has been greeted
     let mut greeting_account = GreetingAccount::try_from_slice(&account.data.borrow())?;
