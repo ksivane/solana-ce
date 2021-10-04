@@ -16,13 +16,22 @@ pub struct GreetingAccount {
     pub d_counter: u32,
 }
 
+// #[derive(BorshSerialize, BorshDeserialize, Debug)]
+// pub struct Params {
+//     pub supply: u64,
+//     pub shipment: u32,
+//     pub code: [u8; 3],
+//     pub des: [u8; 16],
+// }
+
 #[derive(BorshSerialize, BorshDeserialize, Debug)]
 pub struct Params {
     pub supply: u64,
     pub shipment: u32,
-    pub code: [u8; 3],
-    pub des: [u8; 16],
+    pub code: String,
+    pub des: String,
 }
+
 
 // Declare and export the program's entrypoint
 entrypoint!(process_instruction);
@@ -47,25 +56,30 @@ pub fn process_instruction(
         return Err(ProgramError::IncorrectProgramId);
     }
 
-    // let decoded_params = String::try_from_slice(instruction_data).unwrap();
-    // msg!("Decoded data: {:?}", decoded_params);
-
-
     let decoded_params = Params::try_from_slice(instruction_data).unwrap();
     msg!("Decoded data: {:?}", decoded_params);
-
-    let code = String::from_utf8(decoded_params.code.to_vec()).unwrap();
-    let des = String::from_utf8(decoded_params.des.to_vec()).unwrap();
-
-    msg!("Total supply: {}, Code: {}, Description: {}", decoded_params.supply, code, des);
-    msg!("Shipment: {}", decoded_params.shipment);
+    msg!("Supply: {}, Shipment: {}", decoded_params.supply, decoded_params.shipment);
+    msg!("Code: {}, Description: {}", decoded_params.code, decoded_params.des);
 
 
-    
-    //msg!("Shout: {:?}", String::from(&(decoded_params.shout)));
+    // let code = String::from_utf8(decoded_params.code.to_vec()).unwrap();
+    // let des = String::from_utf8(decoded_params.des.to_vec()).unwrap();
 
-    // let (instruction_byte, all_other_bytes) = instruction_data.split_first().unwrap();
-    // msg!("Ins: {}", instruction_byte);
+    // msg!("Total supply: {}, Code: {}, Description: {}", decoded_params.supply, code, des);
+    // msg!("Shipment: {}", decoded_params.shipment);
+
+
+
+
+
+    // let decoded_params = Params::try_from_slice(instruction_data).unwrap();
+    // msg!("Decoded data: {:?}", decoded_params);
+
+    // let code = String::from_utf8(decoded_params.code.to_vec()).unwrap();
+    // let des = String::from_utf8(decoded_params.des.to_vec()).unwrap();
+
+    // msg!("Total supply: {}, Code: {}, Description: {}", decoded_params.supply, code, des);
+    // msg!("Shipment: {}", decoded_params.shipment);
 
 
     // Increment and store the number of times the account has been greeted

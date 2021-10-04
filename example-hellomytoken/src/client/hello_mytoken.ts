@@ -70,6 +70,26 @@ class GreetingAccount {
   }
 }
 
+class Params {
+  supply = 1000;
+  shipment = 10;
+  code = 'CDE';
+  des = 'This is a component';
+  constructor(fields: {supply: number, shipment: number, code: string, des: string} | undefined = undefined) {
+    if (fields) {
+      this.supply = fields.supply;
+      this.shipment = fields.shipment;
+      this.code = fields.code;
+      this.des = fields.des;
+    }
+  }
+}
+
+const ParamsSchema = new Map([
+  [Params, {kind: 'struct', fields: [['supply', 'u64'], ['shipment', 'u32'], ['code', 'string'], ['des', 'string']]}],
+]);
+
+
 /**
  * Borsh schema definition for greeting accounts
  */
@@ -202,49 +222,54 @@ export async function checkProgram(): Promise<void> {
  */
 export async function sayHello(): Promise<void> {
   console.log('Saying hello to', greetedPubkey.toBase58());
-  let buf = Buffer.alloc(31);
-  buf[0] = 0;
-  buf[1] = 1;
-  buf[2] = 2;
-  buf[3] = 3;
-  buf[4] = 4;
-  buf[5] = 5;
-  buf[6] = 6;
-  buf[7] = 7;
 
-  buf[8] = 72;
-  buf[9] = 69;
-  buf[10] = 69;
-  buf[11] = 71;
+  // let buf = Buffer.alloc(31);
+  // buf[0] = 0;
+  // buf[1] = 1;
+  // buf[2] = 2;
+  // buf[3] = 3;
+  // buf[4] = 4;
+  // buf[5] = 5;
+  // buf[6] = 6;
+  // buf[7] = 7;
 
-  buf[12] = 72;
-  buf[13] = 73;
-  buf[14] = 74;
+  // buf[8] = 72;
+  // buf[9] = 69;
+  // buf[10] = 69;
+  // buf[11] = 71;
 
-  buf[15] = 77;
-  buf[16] = 116;
-  buf[17] = 114;
-  buf[18] = 111;
-  buf[19] = 108;
-  buf[20] = 108;
-  buf[21] = 101;
-  buf[22] = 114;
-  buf[23] = 32;
-  buf[24] = 84;
-  buf[25] = 73;
-  buf[26] = 32;
-  buf[27] = 56;
-  buf[28] = 48;
-  buf[29] = 53;
-  buf[30] = 49;
+  // buf[12] = 72;
+  // buf[13] = 73;
+  // buf[14] = 74;
 
+  // buf[15] = 77;
+  // buf[16] = 116;
+  // buf[17] = 114;
+  // buf[18] = 111;
+  // buf[19] = 108;
+  // buf[20] = 108;
+  // buf[21] = 101;
+  // buf[22] = 114;
+  // buf[23] = 32;
+  // buf[24] = 84;
+  // buf[25] = 73;
+  // buf[26] = 32;
+  // buf[27] = 56;
+  // buf[28] = 48;
+  // buf[29] = 53;
+  // buf[30] = 49;
+
+  let myparams = borsh.serialize(
+    ParamsSchema,
+    new Params(),
+  );
   
-  //let buf = Buffer.from("Hello");
+  
 
   const instruction = new TransactionInstruction({
     keys: [{pubkey: greetedPubkey, isSigner: false, isWritable: true}],
     programId,
-    data: buf, //Buffer.alloc(8), // All instructions are hellos
+    data: Buffer.from(myparams), //buf, //Buffer.alloc(8), // All instructions are hellos
   });
   await sendAndConfirmTransaction(
     connection,
