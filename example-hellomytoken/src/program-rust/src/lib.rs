@@ -1,3 +1,4 @@
+// use serde::{Serialize, Deserialize};
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{
     account_info::{next_account_info, AccountInfo},
@@ -34,6 +35,12 @@ pub struct Params {
     //pub sarr: [String; 2], // error: says borsh not implemented for String[]
 }
 
+// #[derive(Serialize, Deserialize, Debug)]
+// struct Point {
+//     x: i32,
+//     y: i32,
+// }
+
 
 // Declare and export the program's entrypoint
 entrypoint!(process_instruction);
@@ -63,6 +70,9 @@ pub fn process_instruction(
     msg!("Supply: {}, Shipment: {}", decoded_params.supply, decoded_params.shipment);
     msg!("Code: {}, Description: {}", decoded_params.code, decoded_params.des);
     msg!("Arr8: {:?}", decoded_params.arr8);
+
+    // let point: Point = serde_json::from_str(&decoded_params.data).unwrap();
+    // msg!("Point = {:?}", point);
 
 
     // let code = String::from_utf8(decoded_params.code.to_vec()).unwrap();

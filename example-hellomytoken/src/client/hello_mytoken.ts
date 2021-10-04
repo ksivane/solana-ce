@@ -275,6 +275,11 @@ export async function sayHello(): Promise<void> {
 
   this_params.code = 'I-TI-snc56';
 
+  // this_params.data = JSON.stringify({
+  //   'x': 1,
+  //   'y': 2
+  // });
+
   let myparams = borsh.serialize(
     ParamsSchema,
     this_params,
