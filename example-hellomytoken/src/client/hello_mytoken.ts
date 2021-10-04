@@ -72,12 +72,14 @@ const PROGRAM_KEYPAIR_PATH = path.join(PROGRAM_PATH, 'hellomytoken-keypair.json'
 
 class Component {
   id = 0;       // u8 as defined in schema
-  description = '';
-  serial_no = '';
+  // description = 'Some short description of the component';
+  description = new Uint8Array(64);
+  // serial_no = 'XXX-YYY-000000';
+  serial_no = new Uint8Array(16);
   parent = 0;   // u8
   children = new Uint8Array(10); // only fixed size supported by borsh
 
-  constructor(fields: {id: number, description: string, serial_no: string, parent: number, children: Uint8Array} | undefined = undefined) {
+  constructor(fields: {id: number, description: Uint8Array, serial_no: Uint8Array, parent: number, children: Uint8Array} | undefined = undefined) {
     if (fields) {
       this.id = fields.id;
       this.description = fields.description;
@@ -91,8 +93,8 @@ class Component {
 const ComponentSchema = new Map([
   [Component, {kind: 'struct', fields: [
     ['id', 'u8'],  // types must match that in program
-    ['description', 'string'],
-    ['serial_no', 'string'],
+    ['description', [64]],
+    ['serial_no', [16]],
     ['parent', 'u8'],
     ['children', [10]],
   ]}],
@@ -237,8 +239,11 @@ export async function sayHello(): Promise<void> {
 
   let this_component = new Component()
   this_component.id = 10;
-  this_component.description = 'Qualcom Cpu';
-  this_component.serial_no = 'QPU-QWE-100098'
+  // this_component.description = 'Qualcom Cpu';
+  this_component.description = new TextEncoder().encode("Short description that must be exactly 64 characters in length!!");
+  this_component.serial_no = new TextEncoder().encode("QPUA-QWWW-100098");
+  // this_component.serial_no = 'QPU-QWE-100098';
+
   
   let this_component_s = borsh.serialize(
     ComponentSchema,
@@ -275,13 +280,17 @@ export async function reportComponent(): Promise<void> {
     greetedPubkey.toBase58(),
     'ID:',
     component.id,
+    '\n',
     'Description:',
-    component.description,
+    new TextDecoder().decode(component.description),
+    '\n',
     'Serial No.:',
-    component.serial_no,
-    'Parent:',
+    new TextDecoder().decode(component.serial_no),
+    '\n',
+    'Parent component ID:',
     component.parent,
-    'Children:',
+    '\n',
+    'Children components IDs:',
     component.children,
   );
 }
