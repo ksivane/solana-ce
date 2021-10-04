@@ -33,9 +33,10 @@ let payer: Keypair;
 let programId: PublicKey;
 
 /**
- * The public key of the account we are saying hello to
+ * The public keys of the accounts the components belong to
  */
-let greetedPubkey: PublicKey;
+let qcom: PublicKey;
+let nvd: PublicKey;
 
 /**
  * Path to program files
@@ -186,20 +187,20 @@ export async function checkProgram(): Promise<void> {
   }
   console.log(`Using program ${programId.toBase58()}`);
 
-  // Derive the address (public key) of a greeting account from the program so that it's easy to find later.
-  const COMPONENT_SEED = 'hello-component';
-  greetedPubkey = await PublicKey.createWithSeed(
+  // Derive the address (public key) of a component account from the program so that it's easy to find later.
+  const COMPONENT_SEED_QCOM = 'hello-component-qcom';
+  qcom = await PublicKey.createWithSeed(
     payer.publicKey,
-    COMPONENT_SEED,
+    COMPONENT_SEED_QCOM,
     programId,
   );
 
   // Check if the greeting account has already been created
-  const greetedAccount = await connection.getAccountInfo(greetedPubkey);
-  if (greetedAccount === null) {
+  const greetedAccount_qcom = await connection.getAccountInfo(qcom);
+  if (greetedAccount_qcom === null) {
     console.log(
       'Creating account',
-      greetedPubkey.toBase58(),
+      qcom.toBase58(),
       'to store component',
       'with storage size: ',
       COMPONENT_SIZE
@@ -212,8 +213,44 @@ export async function checkProgram(): Promise<void> {
       SystemProgram.createAccountWithSeed({
         fromPubkey: payer.publicKey,
         basePubkey: payer.publicKey,
-        seed: COMPONENT_SEED,
-        newAccountPubkey: greetedPubkey,
+        seed: COMPONENT_SEED_QCOM,
+        newAccountPubkey: qcom,
+        lamports,
+        space: COMPONENT_SIZE,
+        programId,
+      }),
+    );
+    await sendAndConfirmTransaction(connection, transaction, [payer]);
+  }
+
+  // Derive the address (public key) of a greeting account from the program so that it's easy to find later.
+  const COMPONENT_SEED_NVD = 'hello-component-nvd';
+  nvd = await PublicKey.createWithSeed(
+    payer.publicKey,
+    COMPONENT_SEED_NVD,
+    programId,
+  );
+
+  // Check if the greeting account has already been created
+  const greetedAccount_nvd = await connection.getAccountInfo(nvd);
+  if (greetedAccount_nvd === null) {
+    console.log(
+      'Creating account',
+      nvd.toBase58(),
+      'to store component',
+      'with storage size: ',
+      COMPONENT_SIZE
+    );
+    const lamports = await connection.getMinimumBalanceForRentExemption(
+      COMPONENT_SIZE,
+    );
+
+    const transaction = new Transaction().add(
+      SystemProgram.createAccountWithSeed({
+        fromPubkey: payer.publicKey,
+        basePubkey: payer.publicKey,
+        seed: COMPONENT_SEED_NVD,
+        newAccountPubkey: nvd,
         lamports,
         space: COMPONENT_SIZE,
         programId,
@@ -223,11 +260,12 @@ export async function checkProgram(): Promise<void> {
   }
 }
 
-/**
- * Say hello
- */
-export async function createComponent(): Promise<void> {
-  console.log('Creating component for account:', greetedPubkey.toBase58());
+
+
+
+// QCOM ///////////////////////////////////////////////////////////////////////////////////////
+export async function createComponentQcom(): Promise<void> {
+  console.log('Creating component for account:', qcom.toBase58());
 
   let this_component = new Component()
   this_component.opcode = 100; // u8
@@ -241,7 +279,7 @@ export async function createComponent(): Promise<void> {
   );
 
   const instruction = new TransactionInstruction({
-    keys: [{pubkey: greetedPubkey, isSigner: false, isWritable: true}],
+    keys: [{pubkey: qcom, isSigner: false, isWritable: true}],
     programId,
     data: Buffer.from(this_component_s),
   });
@@ -253,14 +291,14 @@ export async function createComponent(): Promise<void> {
 }
 
 
-export async function updateComponent(): Promise<void> {
-  console.log('Updating component for account:', greetedPubkey.toBase58());
+export async function updateComponentQcom(): Promise<void> {
+  console.log('Updating component for account:', qcom.toBase58());
 
   let this_component = new Component()
   this_component.opcode = 101; // u8
-  this_component.id = 0; //u8, will be ignored during update
+  //this_component.id = 0; //u8, will be ignored during update
   this_component.description = new TextEncoder().encode("Short description that must be exactly 64 characters in length!!"); // len exactly 64bytes
-  this_component.serial_no = new TextEncoder().encode("XXXX-XXXX-000000"); // len exactly 16 bytes, will be ignored during update
+  //this_component.serial_no = new TextEncoder().encode("XXXX-XXXX-000000"); // len exactly 16 bytes, will be ignored during update
   
   let this_component_s = borsh.serialize(
     ComponentSchema,
@@ -268,7 +306,7 @@ export async function updateComponent(): Promise<void> {
   );
 
   const instruction = new TransactionInstruction({
-    keys: [{pubkey: greetedPubkey, isSigner: false, isWritable: true}],
+    keys: [{pubkey: qcom, isSigner: false, isWritable: true}],
     programId,
     data: Buffer.from(this_component_s),
   });
@@ -283,8 +321,8 @@ export async function updateComponent(): Promise<void> {
 /**
  * Report the number of times the greeted account has been said hello to
  */
-export async function reportComponent(): Promise<void> {
-  const accountInfo = await connection.getAccountInfo(greetedPubkey);
+export async function reportComponentQcom(): Promise<void> {
+  const accountInfo = await connection.getAccountInfo(qcom);
   if (accountInfo === null) {
     throw 'Error: cannot find the greeted account';
   }
@@ -295,7 +333,7 @@ export async function reportComponent(): Promise<void> {
   );
   console.log(
     'Account:',
-    greetedPubkey.toBase58(),
+    qcom.toBase58(),
     '\n',
     'ID:',
     component.id,
@@ -311,5 +349,124 @@ export async function reportComponent(): Promise<void> {
     '\n',
     'Children components IDs:',
     component.children,
+  );
+}
+// NVD////////////////////////////////////////////////////////////////////////////////////////
+export async function createComponentNvd(): Promise<void> {
+  console.log('Creating component for account:', nvd.toBase58());
+
+  let this_component = new Component()
+  this_component.opcode = 100; // u8
+  this_component.id = 201; //u8
+  this_component.description = new TextEncoder().encode("Exact description that must be exactly 64 characters in length!!"); // len exactly 64bytes
+  this_component.serial_no = new TextEncoder().encode("NVDA-QWWW-765390"); // len exactly 16 bytes
+  
+  let this_component_s = borsh.serialize(
+    ComponentSchema,
+    this_component,
+  );
+
+  const instruction = new TransactionInstruction({
+    keys: [{pubkey: nvd, isSigner: false, isWritable: true}],
+    programId,
+    data: Buffer.from(this_component_s),
+  });
+  await sendAndConfirmTransaction(
+    connection,
+    new Transaction().add(instruction),
+    [payer],
+  );
+}
+
+
+export async function updateComponentNvd(): Promise<void> {
+  console.log('Updating component for account:', nvd.toBase58());
+
+  let this_component = new Component()
+  this_component.opcode = 101; // u8
+  //this_component.id = 0; //u8, will be ignored during update
+  this_component.description = new TextEncoder().encode("Exact description that must be exactly 64 characters in length!*"); // len exactly 64bytes
+  //this_component.serial_no = new TextEncoder().encode("XXXX-XXXX-000000"); // len exactly 16 bytes, will be ignored during update
+  
+  let this_component_s = borsh.serialize(
+    ComponentSchema,
+    this_component,
+  );
+
+  const instruction = new TransactionInstruction({
+    keys: [{pubkey: nvd, isSigner: false, isWritable: true}],
+    programId,
+    data: Buffer.from(this_component_s),
+  });
+  await sendAndConfirmTransaction(
+    connection,
+    new Transaction().add(instruction),
+    [payer],
+  );
+}
+
+
+/**
+ * Report the number of times the greeted account has been said hello to
+ */
+export async function reportComponentNvd(): Promise<void> {
+  const accountInfo = await connection.getAccountInfo(nvd);
+  if (accountInfo === null) {
+    throw 'Error: cannot find the greeted account';
+  }
+  const component = borsh.deserialize(
+    ComponentSchema,
+    Component,
+    accountInfo.data,
+  );
+  console.log(
+    'Account:',
+    nvd.toBase58(),
+    '\n',
+    'ID:',
+    component.id,
+    '\n',
+    'Description:',
+    new TextDecoder().decode(component.description),
+    '\n',
+    'Serial No.:',
+    new TextDecoder().decode(component.serial_no),
+    '\n',
+    'Parent component ID:',
+    component.parent,
+    '\n',
+    'Children components IDs:',
+    component.children,
+  );
+}
+
+
+// Add QCOM to NVD as child ///////////////////////////////////////////////////////////////////////////////////
+export async function addAsChild(): Promise<void> {
+  console.log("Adding child to parent:");
+  console.log('Child:', qcom.toBase58());
+  console.log('Parent:', nvd.toBase58());
+
+  let this_component = new Component()
+  this_component.opcode = 102; // u8
+  //this_component.id = 0; //u8, ignored for this op
+  //this_component.description = new TextEncoder().encode("Exact description that must be exactly 64 characters in length!!"); // len exactly 64bytes, ignored
+  //this_component.serial_no = new TextEncoder().encode("NVDA-QWWW-765390"); // len exactly 16 bytes, ignored
+  
+  let this_component_s = borsh.serialize(
+    ComponentSchema,
+    this_component,
+  );
+
+  const instruction = new TransactionInstruction({
+    keys: [{pubkey: qcom, isSigner: false, isWritable: true},
+      {pubkey: nvd, isSigner: false, isWritable: true}],
+    programId,
+    data: Buffer.from(this_component_s),
+  });
+  await sendAndConfirmTransaction(
+    connection,
+    new Transaction().add(instruction),
+    [payer],
   );
 }

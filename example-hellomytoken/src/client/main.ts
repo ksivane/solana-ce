@@ -6,9 +6,13 @@ import {
   establishConnection,
   establishPayer,
   checkProgram,
-  createComponent,
-  updateComponent,
-  reportComponent,
+  createComponentQcom,
+  updateComponentQcom,
+  reportComponentQcom,
+  createComponentNvd,
+  updateComponentNvd,
+  reportComponentNvd,
+  addAsChild,
 } from './hello_mytoken';
 
 async function main() {
@@ -23,17 +27,45 @@ async function main() {
   // Check if the program has been deployed
   await checkProgram();
 
-  // create component of an account
-  await createComponent();
 
-  // retrieve latest component info from ledger
-  await reportComponent();
 
   // create component of an account
-  await updateComponent();
+  await createComponentQcom();
 
   // retrieve latest component info from ledger
-  await reportComponent();
+  await reportComponentQcom();
+
+  // update component of an account
+  await updateComponentQcom();
+
+  // retrieve latest component info from ledger
+  await reportComponentQcom();
+
+
+
+  // create component of an account
+  await createComponentNvd();
+
+  // retrieve latest component info from ledger
+  await reportComponentNvd();
+
+  // update component of an account
+  await updateComponentNvd();
+
+  // retrieve latest component info from ledger
+  await reportComponentNvd();
+
+
+
+  // add component as child of another
+  await addAsChild();
+
+  // retrieve latest component info from ledger
+  await reportComponentNvd();
+  await reportComponentQcom();
+
+
+
 
   console.log('Success');
 }

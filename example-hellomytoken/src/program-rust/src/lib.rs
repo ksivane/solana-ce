@@ -88,6 +88,30 @@ pub fn process_instruction(
             msg!("Opcode: {}", component.opcode);
         }
 
+        102 => {
+            msg!("Opcode: 102 <Add as child>");
+            
+            let mut component_child = Component::try_from_slice(&account.data.borrow())?;
+            let account_parent = next_account_info(accounts_iter)?;
+            let mut component_parent = Component::try_from_slice(&account_parent.data.borrow())?;
+
+            component_child.parent = component_parent.id;
+            component_parent.children[0] = component_child.id;
+            component_parent.opcode = decoded_component.opcode;
+            component_child.opcode = decoded_component.opcode;
+            
+            component_child.serialize(&mut &mut account.data.borrow_mut()[..])?;
+            component_parent.serialize(&mut &mut account_parent.data.borrow_mut()[..])?;
+
+            msg!("Updated component. ID: {}, Description: {:?}", component_child.id, component_child.description);
+            msg!("Serial No: {:?}, Parent: {}", component_child.serial_no, component_child.parent);
+            msg!("Opcode: {}", component_child.opcode);
+
+            msg!("Updated component. ID: {}, Description: {:?}", component_parent.id, component_parent.description);
+            msg!("Serial No: {:?}, Parent: {}", component_parent.serial_no, component_parent.parent);
+            msg!("Opcode: {}", component_parent.opcode);
+        }
+
         _ => {
             msg!("Unknown opcode");
         }
