@@ -71,22 +71,31 @@ class GreetingAccount {
 }
 
 class Params {
-  supply = 1000;
-  shipment = 10;
+  supply = 1000;  // max u64 as defined in schema
+  shipment = 10;  // max u16 as defined in schema
   code = 'CDE';
   des = 'This is a component';
-  constructor(fields: {supply: number, shipment: number, code: string, des: string} | undefined = undefined) {
+  arr8 = new Uint8Array(3); // looks like only fixed size arrays are supported
+  // sarr: string[] = ["Hello", "world"]; looks like string array, along with many other types, are not supported by Borsh
+  constructor(fields: {supply: number, shipment: number, code: string, des: string, arr: Uint8Array} | undefined = undefined) {
     if (fields) {
       this.supply = fields.supply;
       this.shipment = fields.shipment;
       this.code = fields.code;
       this.des = fields.des;
+      this.arr8 = fields.arr;
     }
   }
 }
 
 const ParamsSchema = new Map([
-  [Params, {kind: 'struct', fields: [['supply', 'u64'], ['shipment', 'u32'], ['code', 'string'], ['des', 'string']]}],
+  [Params, {kind: 'struct', fields: [
+    ['supply', 'u64'],  // types must match that in program
+    ['shipment', 'u16'],
+    ['code', 'string'],
+    ['des', 'string'],
+    ['arr8', [3]],
+  ]}],
 ]);
 
 
@@ -259,9 +268,16 @@ export async function sayHello(): Promise<void> {
   // buf[29] = 53;
   // buf[30] = 49;
 
+  let this_params = new Params()
+  this_params.arr8[0] = 100;
+  this_params.arr8[1] = 200;
+  this_params.arr8[2] = 255; // max for uint8
+
+  this_params.code = 'I-TI-snc56';
+
   let myparams = borsh.serialize(
     ParamsSchema,
-    new Params(),
+    this_params,
   );
   
   

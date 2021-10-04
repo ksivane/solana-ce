@@ -27,9 +27,11 @@ pub struct GreetingAccount {
 #[derive(BorshSerialize, BorshDeserialize, Debug)]
 pub struct Params {
     pub supply: u64,
-    pub shipment: u32,
+    pub shipment: u16,
     pub code: String,
     pub des: String,
+    pub arr8: [u8; 3],
+    //pub sarr: [String; 2], // error: says borsh not implemented for String[]
 }
 
 
@@ -60,6 +62,7 @@ pub fn process_instruction(
     msg!("Decoded data: {:?}", decoded_params);
     msg!("Supply: {}, Shipment: {}", decoded_params.supply, decoded_params.shipment);
     msg!("Code: {}, Description: {}", decoded_params.code, decoded_params.des);
+    msg!("Arr8: {:?}", decoded_params.arr8);
 
 
     // let code = String::from_utf8(decoded_params.code.to_vec()).unwrap();
