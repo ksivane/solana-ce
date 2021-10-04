@@ -70,31 +70,31 @@ class GreetingAccount {
   }
 }
 
-class Params {
-  supply = 1000;  // max u64 as defined in schema
-  shipment = 10;  // max u16 as defined in schema
-  code = 'CDE';
-  des = 'This is a component';
-  arr8 = new Uint8Array(3); // looks like only fixed size arrays are supported
-  // sarr: string[] = ["Hello", "world"]; looks like string array, along with many other types, are not supported by Borsh
-  constructor(fields: {supply: number, shipment: number, code: string, des: string, arr: Uint8Array} | undefined = undefined) {
+class Component {
+  id = 0;       // u8 as defined in schema
+  description = 'Some description';
+  serial_no = 'XXX-XXX-000000';
+  parent = 0;   // u8
+  children = new Uint8Array(10); // only fixed size supported by borsh
+
+  constructor(fields: {id: number, description: string, serial_no: string, parent: number, children: Uint8Array} | undefined = undefined) {
     if (fields) {
-      this.supply = fields.supply;
-      this.shipment = fields.shipment;
-      this.code = fields.code;
-      this.des = fields.des;
-      this.arr8 = fields.arr;
+      this.id = fields.id;
+      this.description = fields.description;
+      this.serial_no = fields.serial_no;
+      this.parent = fields.parent;
+      this.children = fields.children;
     }
   }
 }
 
-const ParamsSchema = new Map([
-  [Params, {kind: 'struct', fields: [
-    ['supply', 'u64'],  // types must match that in program
-    ['shipment', 'u16'],
-    ['code', 'string'],
-    ['des', 'string'],
-    ['arr8', [3]],
+const ComponentSchema = new Map([
+  [Component, {kind: 'struct', fields: [
+    ['id', 'u8'],  // types must match that in program
+    ['description', 'string'],
+    ['serial_no', 'string'],
+    ['parent', 'u8'],
+    ['children', [10]],
   ]}],
 ]);
 
@@ -232,65 +232,20 @@ export async function checkProgram(): Promise<void> {
 export async function sayHello(): Promise<void> {
   console.log('Saying hello to', greetedPubkey.toBase58());
 
-  // let buf = Buffer.alloc(31);
-  // buf[0] = 0;
-  // buf[1] = 1;
-  // buf[2] = 2;
-  // buf[3] = 3;
-  // buf[4] = 4;
-  // buf[5] = 5;
-  // buf[6] = 6;
-  // buf[7] = 7;
-
-  // buf[8] = 72;
-  // buf[9] = 69;
-  // buf[10] = 69;
-  // buf[11] = 71;
-
-  // buf[12] = 72;
-  // buf[13] = 73;
-  // buf[14] = 74;
-
-  // buf[15] = 77;
-  // buf[16] = 116;
-  // buf[17] = 114;
-  // buf[18] = 111;
-  // buf[19] = 108;
-  // buf[20] = 108;
-  // buf[21] = 101;
-  // buf[22] = 114;
-  // buf[23] = 32;
-  // buf[24] = 84;
-  // buf[25] = 73;
-  // buf[26] = 32;
-  // buf[27] = 56;
-  // buf[28] = 48;
-  // buf[29] = 53;
-  // buf[30] = 49;
-
-  let this_params = new Params()
-  this_params.arr8[0] = 100;
-  this_params.arr8[1] = 200;
-  this_params.arr8[2] = 255; // max for uint8
-
-  this_params.code = 'I-TI-snc56';
-
-  // this_params.data = JSON.stringify({
-  //   'x': 1,
-  //   'y': 2
-  // });
-
-  let myparams = borsh.serialize(
-    ParamsSchema,
-    this_params,
+  let this_component = new Component()
+  this_component.id = 10;
+  this_component.description = 'Qualcom Cpu';
+  this_component.serial_no = 'QPU-QWE-100098'
+  
+  let this_component_s = borsh.serialize(
+    ComponentSchema,
+    this_component,
   );
-  
-  
 
   const instruction = new TransactionInstruction({
     keys: [{pubkey: greetedPubkey, isSigner: false, isWritable: true}],
     programId,
-    data: Buffer.from(myparams), //buf, //Buffer.alloc(8), // All instructions are hellos
+    data: Buffer.from(this_component_s),
   });
   await sendAndConfirmTransaction(
     connection,

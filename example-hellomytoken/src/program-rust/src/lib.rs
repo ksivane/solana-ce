@@ -1,4 +1,3 @@
-// use serde::{Serialize, Deserialize};
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{
     account_info::{next_account_info, AccountInfo},
@@ -17,29 +16,14 @@ pub struct GreetingAccount {
     pub d_counter: u32,
 }
 
-// #[derive(BorshSerialize, BorshDeserialize, Debug)]
-// pub struct Params {
-//     pub supply: u64,
-//     pub shipment: u32,
-//     pub code: [u8; 3],
-//     pub des: [u8; 16],
-// }
-
 #[derive(BorshSerialize, BorshDeserialize, Debug)]
-pub struct Params {
-    pub supply: u64,
-    pub shipment: u16,
-    pub code: String,
-    pub des: String,
-    pub arr8: [u8; 3],
-    //pub sarr: [String; 2], // error: says borsh not implemented for String[]
+pub struct Component {
+    pub id: u8,
+    pub description: String,
+    pub serial_no: String,
+    pub parent: u8,
+    pub children: [u8; 10],
 }
-
-// #[derive(Serialize, Deserialize, Debug)]
-// struct Point {
-//     x: i32,
-//     y: i32,
-// }
 
 
 // Declare and export the program's entrypoint
@@ -65,35 +49,11 @@ pub fn process_instruction(
         return Err(ProgramError::IncorrectProgramId);
     }
 
-    let decoded_params = Params::try_from_slice(instruction_data).unwrap();
-    msg!("Decoded data: {:?}", decoded_params);
-    msg!("Supply: {}, Shipment: {}", decoded_params.supply, decoded_params.shipment);
-    msg!("Code: {}, Description: {}", decoded_params.code, decoded_params.des);
-    msg!("Arr8: {:?}", decoded_params.arr8);
-
-    // let point: Point = serde_json::from_str(&decoded_params.data).unwrap();
-    // msg!("Point = {:?}", point);
-
-
-    // let code = String::from_utf8(decoded_params.code.to_vec()).unwrap();
-    // let des = String::from_utf8(decoded_params.des.to_vec()).unwrap();
-
-    // msg!("Total supply: {}, Code: {}, Description: {}", decoded_params.supply, code, des);
-    // msg!("Shipment: {}", decoded_params.shipment);
-
-
-
-
-
-    // let decoded_params = Params::try_from_slice(instruction_data).unwrap();
-    // msg!("Decoded data: {:?}", decoded_params);
-
-    // let code = String::from_utf8(decoded_params.code.to_vec()).unwrap();
-    // let des = String::from_utf8(decoded_params.des.to_vec()).unwrap();
-
-    // msg!("Total supply: {}, Code: {}, Description: {}", decoded_params.supply, code, des);
-    // msg!("Shipment: {}", decoded_params.shipment);
-
+    let decoded_component = Component::try_from_slice(instruction_data).unwrap();
+    msg!("Decoded component: {:?}", decoded_component);
+    msg!("ID: {}, Description: {}", decoded_component.id, decoded_component.description);
+    msg!("Serial No.: {}, Parent: {}", decoded_component.serial_no, decoded_component.parent);
+    msg!("Children: {:?}", decoded_component.children);
 
     // Increment and store the number of times the account has been greeted
     let mut greeting_account = GreetingAccount::try_from_slice(&account.data.borrow())?;
