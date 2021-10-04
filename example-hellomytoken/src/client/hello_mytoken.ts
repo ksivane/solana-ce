@@ -59,18 +59,8 @@ const PROGRAM_KEYPAIR_PATH = path.join(PROGRAM_PATH, 'hellomytoken-keypair.json'
 /**
  * The state of a greeting account managed by the hello mytoken program
  */
-// class GreetingAccount {
-//   counter = 0;
-//   d_counter = 0;
-//   constructor(fields: {counter: number, d_counter: number} | undefined = undefined) {
-//     if (fields) {
-//       this.counter = fields.counter;
-//       this.d_counter = fields.d_counter;
-//     }
-//   }
-// }
-
 class Component {
+  opcode = 0;   // u8 as defined in schema
   id = 0;       // u8 as defined in schema
   // description = 'Some short description of the component';
   description = new Uint8Array(64);
@@ -79,8 +69,9 @@ class Component {
   parent = 0;   // u8
   children = new Uint8Array(10); // only fixed size supported by borsh
 
-  constructor(fields: {id: number, description: Uint8Array, serial_no: Uint8Array, parent: number, children: Uint8Array} | undefined = undefined) {
+  constructor(fields: {opcode: number, id: number, description: Uint8Array, serial_no: Uint8Array, parent: number, children: Uint8Array} | undefined = undefined) {
     if (fields) {
+      this.opcode = fields.opcode;
       this.id = fields.id;
       this.description = fields.description;
       this.serial_no = fields.serial_no;
@@ -92,6 +83,7 @@ class Component {
 
 const ComponentSchema = new Map([
   [Component, {kind: 'struct', fields: [
+    ['opcode', 'u8'],
     ['id', 'u8'],  // types must match that in program
     ['description', [64]],
     ['serial_no', [16]],
@@ -238,12 +230,10 @@ export async function sayHello(): Promise<void> {
   console.log('Saying hello to', greetedPubkey.toBase58());
 
   let this_component = new Component()
+  this_component.opcode = 100;
   this_component.id = 10;
-  // this_component.description = 'Qualcom Cpu';
   this_component.description = new TextEncoder().encode("Short description that must be exactly 64 characters in length!!");
   this_component.serial_no = new TextEncoder().encode("QPUA-QWWW-100098");
-  // this_component.serial_no = 'QPU-QWE-100098';
-
   
   let this_component_s = borsh.serialize(
     ComponentSchema,

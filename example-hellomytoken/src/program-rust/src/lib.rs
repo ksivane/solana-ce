@@ -10,6 +10,7 @@ use solana_program::{
 
 #[derive(BorshSerialize, BorshDeserialize, Debug)]
 pub struct Component {
+    pub opcode: u8,
     pub id: u8,
     // pub description: String,
     pub description: [u8; 64],
@@ -48,25 +49,25 @@ pub fn process_instruction(
     msg!("ID: {}, Description: {:?}", decoded_component.id, decoded_component.description);
     msg!("Serial No.: {:?}, Parent: {}", decoded_component.serial_no, decoded_component.parent);
     msg!("Children: {:?}", decoded_component.children);
+    msg!("Opcode: {}", decoded_component.opcode);
+
 
     let mut component = Component::try_from_slice(&account.data.borrow())?;
-    // let mut component = try_from_slice_unchecked::<Component>(&account.data.borrow())?;
-    // let mut component = try_from_slice_unchecked::<Component>(&account.data.borrow()).unwrap();
-
-    
-    
     
     component.id = decoded_component.id;
     component.description = decoded_component.description;
     component.serial_no = decoded_component.serial_no;
     component.parent = decoded_component.parent;
     component.children = decoded_component.children;
+    component.opcode = decoded_component.opcode;
 
 
     component.serialize(&mut &mut account.data.borrow_mut()[..])?;
 
-    // msg!("Updated component. ID: {}, Description: {}!", component.id, component.description);
-    // msg!("Serial No: {}, Parent: {}!", component.serial_no, component.parent);
+    msg!("Updated component. ID: {}, Description: {:?}", component.id, component.description);
+    msg!("Serial No: {:?}, Parent: {}", component.serial_no, component.parent);
+    msg!("Opcode: {}", component.opcode);
+
 
 
     Ok(())
