@@ -226,14 +226,14 @@ export async function checkProgram(): Promise<void> {
 /**
  * Say hello
  */
-export async function sayHello(): Promise<void> {
-  console.log('Saying hello to', greetedPubkey.toBase58());
+export async function createComponent(): Promise<void> {
+  console.log('Creating component for account:', greetedPubkey.toBase58());
 
   let this_component = new Component()
-  this_component.opcode = 100;
-  this_component.id = 10;
-  this_component.description = new TextEncoder().encode("Short description that must be exactly 64 characters in length!!");
-  this_component.serial_no = new TextEncoder().encode("QPUA-QWWW-100098");
+  this_component.opcode = 100; // u8
+  this_component.id = 101; //u8
+  this_component.description = new TextEncoder().encode("Short description that must be exactly 64 characters in length:("); // len exactly 64bytes
+  this_component.serial_no = new TextEncoder().encode("QPUA-QWWW-100099"); // len exactly 16 bytes
   
   let this_component_s = borsh.serialize(
     ComponentSchema,
@@ -252,6 +252,34 @@ export async function sayHello(): Promise<void> {
   );
 }
 
+
+export async function updateComponent(): Promise<void> {
+  console.log('Updating component for account:', greetedPubkey.toBase58());
+
+  let this_component = new Component()
+  this_component.opcode = 101; // u8
+  this_component.id = 0; //u8, will be ignored during update
+  this_component.description = new TextEncoder().encode("Short description that must be exactly 64 characters in length!!"); // len exactly 64bytes
+  this_component.serial_no = new TextEncoder().encode("XXXX-XXXX-000000"); // len exactly 16 bytes, will be ignored during update
+  
+  let this_component_s = borsh.serialize(
+    ComponentSchema,
+    this_component,
+  );
+
+  const instruction = new TransactionInstruction({
+    keys: [{pubkey: greetedPubkey, isSigner: false, isWritable: true}],
+    programId,
+    data: Buffer.from(this_component_s),
+  });
+  await sendAndConfirmTransaction(
+    connection,
+    new Transaction().add(instruction),
+    [payer],
+  );
+}
+
+
 /**
  * Report the number of times the greeted account has been said hello to
  */
@@ -268,6 +296,7 @@ export async function reportComponent(): Promise<void> {
   console.log(
     'Account:',
     greetedPubkey.toBase58(),
+    '\n',
     'ID:',
     component.id,
     '\n',

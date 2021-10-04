@@ -51,23 +51,51 @@ pub fn process_instruction(
     msg!("Children: {:?}", decoded_component.children);
     msg!("Opcode: {}", decoded_component.opcode);
 
+    match decoded_component.opcode {
+        100 => {
+            msg!("Opcode: 100 <Create component>");
+            
+            let mut component = Component::try_from_slice(&account.data.borrow())?;
+            
+            component.id = decoded_component.id;
+            component.description = decoded_component.description;
+            component.serial_no = decoded_component.serial_no;
+            component.parent = decoded_component.parent;
+            component.children = decoded_component.children;
+            component.opcode = decoded_component.opcode;
+            
+            component.serialize(&mut &mut account.data.borrow_mut()[..])?;
 
-    let mut component = Component::try_from_slice(&account.data.borrow())?;
+            msg!("Created component. ID: {}, Description: {:?}", component.id, component.description);
+            msg!("Serial No: {:?}, Parent: {}", component.serial_no, component.parent);
+            msg!("Opcode: {}", component.opcode);
+        }
+
+        101 => {
+            msg!("Opcode: 101 <Update component>");
+            
+            let mut component = Component::try_from_slice(&account.data.borrow())?;
+            
+            component.description = decoded_component.description;
+            component.parent = decoded_component.parent;
+            component.children = decoded_component.children;
+            component.opcode = decoded_component.opcode;
+            
+            component.serialize(&mut &mut account.data.borrow_mut()[..])?;
+
+            msg!("Updated component. ID: {}, Description: {:?}", component.id, component.description);
+            msg!("Serial No: {:?}, Parent: {}", component.serial_no, component.parent);
+            msg!("Opcode: {}", component.opcode);
+        }
+
+        _ => {
+            msg!("Unknown opcode");
+        }
+    };
+
     
-    component.id = decoded_component.id;
-    component.description = decoded_component.description;
-    component.serial_no = decoded_component.serial_no;
-    component.parent = decoded_component.parent;
-    component.children = decoded_component.children;
-    component.opcode = decoded_component.opcode;
 
-
-    component.serialize(&mut &mut account.data.borrow_mut()[..])?;
-
-    msg!("Updated component. ID: {}, Description: {:?}", component.id, component.description);
-    msg!("Serial No: {:?}, Parent: {}", component.serial_no, component.parent);
-    msg!("Opcode: {}", component.opcode);
-
+    
 
 
     Ok(())

@@ -6,7 +6,8 @@ import {
   establishConnection,
   establishPayer,
   checkProgram,
-  sayHello,
+  createComponent,
+  updateComponent,
   reportComponent,
 } from './hello_mytoken';
 
@@ -22,10 +23,16 @@ async function main() {
   // Check if the program has been deployed
   await checkProgram();
 
-  // Say hello to an account
-  await sayHello();
+  // create component of an account
+  await createComponent();
 
-  // Find out how many times that account has been greeted
+  // retrieve latest component info from ledger
+  await reportComponent();
+
+  // create component of an account
+  await updateComponent();
+
+  // retrieve latest component info from ledger
   await reportComponent();
 
   console.log('Success');
