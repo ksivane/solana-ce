@@ -59,21 +59,21 @@ const PROGRAM_KEYPAIR_PATH = path.join(PROGRAM_PATH, 'hellomytoken-keypair.json'
 /**
  * The state of a greeting account managed by the hello mytoken program
  */
-class GreetingAccount {
-  counter = 0;
-  d_counter = 0;
-  constructor(fields: {counter: number, d_counter: number} | undefined = undefined) {
-    if (fields) {
-      this.counter = fields.counter;
-      this.d_counter = fields.d_counter;
-    }
-  }
-}
+// class GreetingAccount {
+//   counter = 0;
+//   d_counter = 0;
+//   constructor(fields: {counter: number, d_counter: number} | undefined = undefined) {
+//     if (fields) {
+//       this.counter = fields.counter;
+//       this.d_counter = fields.d_counter;
+//     }
+//   }
+// }
 
 class Component {
   id = 0;       // u8 as defined in schema
-  description = 'Some description';
-  serial_no = 'XXX-XXX-000000';
+  description = '';
+  serial_no = '';
   parent = 0;   // u8
   children = new Uint8Array(10); // only fixed size supported by borsh
 
@@ -102,16 +102,17 @@ const ComponentSchema = new Map([
 /**
  * Borsh schema definition for greeting accounts
  */
-const GreetingSchema = new Map([
-  [GreetingAccount, {kind: 'struct', fields: [['counter', 'u32'],['d_counter', 'u32']]}],
-]);
+// const GreetingSchema = new Map([
+//   [GreetingAccount, {kind: 'struct', fields: [['counter', 'u32'],['d_counter', 'u32']]}],
+// ]);
+
 
 /**
  * The expected size of each greeting account.
  */
-const GREETING_SIZE = borsh.serialize(
-  GreetingSchema,
-  new GreetingAccount(),
+const COMPONENT_SIZE = borsh.serialize(
+  ComponentSchema,
+  new Component(),
 ).length;
 
 /**
@@ -133,7 +134,7 @@ export async function establishPayer(): Promise<void> {
     const {feeCalculator} = await connection.getRecentBlockhash();
 
     // Calculate the cost to fund the greeter account
-    fees += await connection.getMinimumBalanceForRentExemption(GREETING_SIZE);
+    fees += await connection.getMinimumBalanceForRentExemption(COMPONENT_SIZE);
 
     // Calculate the cost of sending transactions
     fees += feeCalculator.lamportsPerSignature * 100; // wag
@@ -192,10 +193,10 @@ export async function checkProgram(): Promise<void> {
   console.log(`Using program ${programId.toBase58()}`);
 
   // Derive the address (public key) of a greeting account from the program so that it's easy to find later.
-  const GREETING_SEED = 'hello';
+  const COMPONENT_SEED = 'hello-component';
   greetedPubkey = await PublicKey.createWithSeed(
     payer.publicKey,
-    GREETING_SEED,
+    COMPONENT_SEED,
     programId,
   );
 
@@ -205,20 +206,22 @@ export async function checkProgram(): Promise<void> {
     console.log(
       'Creating account',
       greetedPubkey.toBase58(),
-      'to say hello to',
+      'to store component',
+      'with storage size: ',
+      COMPONENT_SIZE
     );
     const lamports = await connection.getMinimumBalanceForRentExemption(
-      GREETING_SIZE,
+      COMPONENT_SIZE,
     );
 
     const transaction = new Transaction().add(
       SystemProgram.createAccountWithSeed({
         fromPubkey: payer.publicKey,
         basePubkey: payer.publicKey,
-        seed: GREETING_SEED,
+        seed: COMPONENT_SEED,
         newAccountPubkey: greetedPubkey,
         lamports,
-        space: GREETING_SIZE,
+        space: COMPONENT_SIZE,
         programId,
       }),
     );
@@ -257,22 +260,28 @@ export async function sayHello(): Promise<void> {
 /**
  * Report the number of times the greeted account has been said hello to
  */
-export async function reportGreetings(): Promise<void> {
+export async function reportComponent(): Promise<void> {
   const accountInfo = await connection.getAccountInfo(greetedPubkey);
   if (accountInfo === null) {
     throw 'Error: cannot find the greeted account';
   }
-  const greeting = borsh.deserialize(
-    GreetingSchema,
-    GreetingAccount,
+  const component = borsh.deserialize(
+    ComponentSchema,
+    Component,
     accountInfo.data,
   );
   console.log(
+    'Account:',
     greetedPubkey.toBase58(),
-    'has been greeted',
-    greeting.counter,
-    'and',
-    greeting.d_counter,
-    'time(s)',
+    'ID:',
+    component.id,
+    'Description:',
+    component.description,
+    'Serial No.:',
+    component.serial_no,
+    'Parent:',
+    component.parent,
+    'Children:',
+    component.children,
   );
 }

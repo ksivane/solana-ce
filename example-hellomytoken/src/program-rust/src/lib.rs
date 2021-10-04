@@ -9,12 +9,12 @@ use solana_program::{
 };
 
 /// Define the type of state stored in accounts
-#[derive(BorshSerialize, BorshDeserialize, Debug)]
-pub struct GreetingAccount {
-    /// number of greetings
-    pub counter: u32,
-    pub d_counter: u32,
-}
+// #[derive(BorshSerialize, BorshDeserialize, Debug)]
+// pub struct GreetingAccount {
+//     /// number of greetings
+//     pub counter: u32,
+//     pub d_counter: u32,
+// }
 
 #[derive(BorshSerialize, BorshDeserialize, Debug)]
 pub struct Component {
@@ -55,13 +55,18 @@ pub fn process_instruction(
     msg!("Serial No.: {}, Parent: {}", decoded_component.serial_no, decoded_component.parent);
     msg!("Children: {:?}", decoded_component.children);
 
-    // Increment and store the number of times the account has been greeted
-    let mut greeting_account = GreetingAccount::try_from_slice(&account.data.borrow())?;
-    greeting_account.counter += 1;
-    greeting_account.d_counter = greeting_account.counter * 2;
-    greeting_account.serialize(&mut &mut account.data.borrow_mut()[..])?;
+    let mut component = Component::try_from_slice(&account.data.borrow())?;
+    // component.id = decoded_component.id;
+    // component.description = decoded_component.description;
+    // component.serial_no = decoded_component.serial_no;
+    // component.parent = decoded_component.parent;
+    // // todo children
 
-    msg!("Greeted a total {}, {} time(s)!", greeting_account.counter, greeting_account.d_counter);
+    // component.serialize(&mut &mut account.data.borrow_mut()[..])?;
+
+    // msg!("Updated component. ID: {}, Description: {}!", component.id, component.description);
+    // msg!("Serial No: {}, Parent: {}!", component.serial_no, component.parent);
+
 
     Ok(())
 }

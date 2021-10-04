@@ -7,7 +7,7 @@ import {
   establishPayer,
   checkProgram,
   sayHello,
-  reportGreetings,
+  reportComponent,
 } from './hello_mytoken';
 
 async function main() {
@@ -26,7 +26,7 @@ async function main() {
   await sayHello();
 
   // Find out how many times that account has been greeted
-  await reportGreetings();
+  await reportComponent();
 
   console.log('Success');
 }
