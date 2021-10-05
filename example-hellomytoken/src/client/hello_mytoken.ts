@@ -270,10 +270,8 @@ export async function createComponentQcom(): Promise<void> {
   let this_component = new Component()
   this_component.opcode = 100; // u8
   this_component.id = 101; //u8
-  // this_component.description = new TextEncoder().encode("Short description that must be exactly 64 characters in length:("); // len exactly 64bytes
-  this_component.description = new TextEncoder().encode("Short description that must be exactly 64 characters in length:(".padEnd(64,'*')); // len exactly 64bytes
-
-  this_component.serial_no = new TextEncoder().encode("QPUA-QWWW-100099"); // len exactly 16 bytes
+  this_component.description = new TextEncoder().encode("Mobile CPU (8nm technology), 4 core, 4GB, 16MB cache. Made in SG.".substring(0, 64).padEnd(64,'*')); // len exactly 64bytes
+  this_component.serial_no = new TextEncoder().encode("QPUA-QW-10009".substring(0, 16).padEnd(16,'0')); // len exactly 64bytes
   
   let this_component_s = borsh.serialize(
     ComponentSchema,
@@ -299,7 +297,7 @@ export async function updateComponentQcom(): Promise<void> {
 
   let this_component = new Component()
   this_component.opcode = 101; // u8
-  this_component.description = new TextEncoder().encode("Short description that must be exactly 64 characters in length!!"); // len exactly 64bytes
+  this_component.description = new TextEncoder().encode("Mobile CPU (8nm technology), 6 core, 8GB, 16MB cache. Made in SG.".substring(0, 64).padEnd(64,'*')); // len exactly 64bytes
   // all other fields will be ignored during uodate
 
   let this_component_s = borsh.serialize(
@@ -361,8 +359,9 @@ export async function createComponentNvd(): Promise<void> {
   let this_component = new Component()
   this_component.opcode = 100; // u8
   this_component.id = 201; //u8
-  this_component.description = new TextEncoder().encode("Exact description that must be exactly 64 characters in length!!"); // len exactly 64bytes
-  this_component.serial_no = new TextEncoder().encode("NVDA-QWWW-765390"); // len exactly 16 bytes
+  this_component.description = new TextEncoder().encode("Integrated GPU, 512 stream cores, 1GB VRAM. Made in TW.".substring(0, 64).padEnd(64,'*')); // len exactly 64bytes
+  this_component.serial_no = new TextEncoder().encode("NVD-NN-88-UYTRE".substring(0, 16).padEnd(16,'0')); // len exactly 64bytes
+  
   
   let this_component_s = borsh.serialize(
     ComponentSchema,
@@ -388,7 +387,7 @@ export async function updateComponentNvd(): Promise<void> {
 
   let this_component = new Component()
   this_component.opcode = 101; // u8
-  this_component.description = new TextEncoder().encode("Exact description that must be exactly 64 characters in length!*"); // len exactly 64bytes
+  this_component.description = new TextEncoder().encode("Integrated GPU on chip, 512 stream cores, 1GB VRAM. Made in TW.".substring(0, 64).padEnd(64,'*')); // len exactly 64bytes
   
   let this_component_s = borsh.serialize(
     ComponentSchema,
