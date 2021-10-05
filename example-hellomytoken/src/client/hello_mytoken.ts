@@ -283,11 +283,12 @@ export async function createComponentQcom(): Promise<void> {
     programId,
     data: Buffer.from(this_component_s),
   });
-  await sendAndConfirmTransaction(
+  let tx = await sendAndConfirmTransaction(
     connection,
     new Transaction().add(instruction),
     [payer],
   );
+  console.log("Transaction receipt: ", tx);
 }
 
 
@@ -310,11 +311,12 @@ export async function updateComponentQcom(): Promise<void> {
     programId,
     data: Buffer.from(this_component_s),
   });
-  await sendAndConfirmTransaction(
+  let tx = await sendAndConfirmTransaction(
     connection,
     new Transaction().add(instruction),
     [payer],
   );
+  console.log("Transaction receipt: ", tx);
 }
 
 
@@ -371,11 +373,12 @@ export async function createComponentNvd(): Promise<void> {
     programId,
     data: Buffer.from(this_component_s),
   });
-  await sendAndConfirmTransaction(
+  let tx = await sendAndConfirmTransaction(
     connection,
     new Transaction().add(instruction),
     [payer],
   );
+  console.log("Transaction receipt: ", tx);
 }
 
 
@@ -398,11 +401,12 @@ export async function updateComponentNvd(): Promise<void> {
     programId,
     data: Buffer.from(this_component_s),
   });
-  await sendAndConfirmTransaction(
+  let tx = await sendAndConfirmTransaction(
     connection,
     new Transaction().add(instruction),
     [payer],
   );
+  console.log("Transaction receipt: ", tx);
 }
 
 
@@ -464,9 +468,10 @@ export async function addAsChild(): Promise<void> {
     programId,
     data: Buffer.from(this_component_s),
   });
-  await sendAndConfirmTransaction(
+  let tx = await sendAndConfirmTransaction(
     connection,
     new Transaction().add(instruction),
     [payer],
   );
+  console.log("Transaction receipt: ", tx);
 }

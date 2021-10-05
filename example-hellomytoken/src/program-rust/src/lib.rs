@@ -7,6 +7,7 @@ use solana_program::{
     program_error::ProgramError,
     pubkey::Pubkey,
 };
+use std::str;
 
 #[derive(BorshSerialize, BorshDeserialize, Debug)]
 pub struct Component {
@@ -45,11 +46,13 @@ pub fn process_instruction(
     }
 
     let decoded_component = Component::try_from_slice(instruction_data).unwrap();
+    msg!("------------------------- Received ---------------------------");
     msg!("Decoded component: {:?}", decoded_component);
-    msg!("ID: {}, Description: {:?}", decoded_component.id, decoded_component.description);
-    msg!("Serial No.: {:?}, Parent: {}", decoded_component.serial_no, decoded_component.parent);
-    msg!("Children: {:?}", decoded_component.children);
-    msg!("Opcode: {}", decoded_component.opcode);
+    // msg!("ID: {}, Description: {:?}", decoded_component.id, decoded_component.description);
+    // msg!("Serial No.: {:?}, Parent: {}", decoded_component.serial_no, decoded_component.parent);
+    // msg!("Children: {:?}", decoded_component.children);
+    // msg!("Opcode: {}", decoded_component.opcode);
+    msg!("-------------------------------------------------------------");
 
     match decoded_component.opcode {
         100 => {
@@ -66,9 +69,22 @@ pub fn process_instruction(
             
             component.serialize(&mut &mut account.data.borrow_mut()[..])?;
 
-            msg!("Created component. ID: {}, Description: {:?}", component.id, component.description);
-            msg!("Serial No: {:?}, Parent: {}", component.serial_no, component.parent);
-            msg!("Opcode: {}", component.opcode);
+            // msg!("-------------------------------------------------------------");
+            // msg!("Created component. ID: {}, Description: {:?}", component.id, component.description);
+            // msg!("Serial No: {:?}, Parent: {}", component.serial_no, component.parent);
+            // msg!("Children: {:?}", component.children);
+            // msg!("Opcode: {}", component.opcode);
+            // msg!("-------------------------------------------------------------");
+
+            msg!("------------------------ Component -----------------------------");
+            let des = str::from_utf8(&component.description).unwrap();
+            let s_no = str::from_utf8(&component.serial_no).unwrap();
+
+            msg!("Component (ID: {}, Serial No: {})", component.id, s_no);
+            msg!("Description: {}", des);
+            msg!("Parent component id: {}", component.parent);
+            msg!("List of children component ids: {:?}", component.children);
+            msg!("-------------------------------------------------------------");
         }
 
         101 => {
@@ -83,9 +99,22 @@ pub fn process_instruction(
             
             component.serialize(&mut &mut account.data.borrow_mut()[..])?;
 
-            msg!("Updated component. ID: {}, Description: {:?}", component.id, component.description);
-            msg!("Serial No: {:?}, Parent: {}", component.serial_no, component.parent);
-            msg!("Opcode: {}", component.opcode);
+            // msg!("-------------------------------------------------------------");
+            // msg!("Created component. ID: {}, Description: {:?}", component.id, component.description);
+            // msg!("Serial No: {:?}, Parent: {}", component.serial_no, component.parent);
+            // msg!("Children: {:?}", component.children);
+            // msg!("Opcode: {}", component.opcode);
+            // msg!("-------------------------------------------------------------");
+
+            msg!("------------------------ Component -----------------------------");
+            let des = str::from_utf8(&component.description).unwrap();
+            let s_no = str::from_utf8(&component.serial_no).unwrap();
+
+            msg!("Component (ID: {}, Serial No: {})", component.id, s_no);
+            msg!("Description: {}", des);
+            msg!("Parent component id: {}", component.parent);
+            msg!("List of children component ids: {:?}", component.children);
+            msg!("-------------------------------------------------------------");
         }
 
         102 => {
@@ -103,24 +132,45 @@ pub fn process_instruction(
             component_child.serialize(&mut &mut account.data.borrow_mut()[..])?;
             component_parent.serialize(&mut &mut account_parent.data.borrow_mut()[..])?;
 
-            msg!("Updated component. ID: {}, Description: {:?}", component_child.id, component_child.description);
-            msg!("Serial No: {:?}, Parent: {}", component_child.serial_no, component_child.parent);
-            msg!("Opcode: {}", component_child.opcode);
+            // msg!("-------------------------------------------------------------");
+            // msg!("Created component_child. ID: {}, Description: {:?}", component_child.id, component_child.description);
+            // msg!("Serial No: {:?}, Parent: {}", component_child.serial_no, component_child.parent);
+            // msg!("Children: {:?}", component_child.children);
+            // msg!("Opcode: {}", component_child.opcode);
+            // msg!("-------------------------------------------------------------");
 
-            msg!("Updated component. ID: {}, Description: {:?}", component_parent.id, component_parent.description);
-            msg!("Serial No: {:?}, Parent: {}", component_parent.serial_no, component_parent.parent);
-            msg!("Opcode: {}", component_parent.opcode);
+            // msg!("-------------------------------------------------------------");
+            // msg!("Created component_parent. ID: {}, Description: {:?}", component_parent.id, component_parent.description);
+            // msg!("Serial No: {:?}, Parent: {}", component_parent.serial_no, component_parent.parent);
+            // msg!("Children: {:?}", component_parent.children);
+            // msg!("Opcode: {}", component_parent.opcode);
+            // msg!("-------------------------------------------------------------");
+
+            msg!("------------------------ Component -----------------------------");
+            let des = str::from_utf8(&component_parent.description).unwrap();
+            let s_no = str::from_utf8(&component_parent.serial_no).unwrap();
+
+            msg!("Component (ID: {}, Serial No: {})", component_parent.id, s_no);
+            msg!("Description: {}", des);
+            msg!("Parent component id: {}", component_parent.parent);
+            msg!("List of children component ids: {:?}", component_parent.children);
+            msg!("-------------------------------------------------------------");
+
+            msg!("------------------------ Component -----------------------------");
+            let des = str::from_utf8(&component_child.description).unwrap();
+            let s_no = str::from_utf8(&component_child.serial_no).unwrap();
+
+            msg!("Component (ID: {}, Serial No: {})", component_child.id, s_no);
+            msg!("Description: {}", des);
+            msg!("Parent component id: {}", component_child.parent);
+            msg!("List of children component ids: {:?}", component_child.children);
+            msg!("-------------------------------------------------------------");
         }
 
         _ => {
             msg!("Unknown opcode");
         }
     };
-
-    
-
-    
-
 
     Ok(())
 }
