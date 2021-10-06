@@ -75,6 +75,19 @@ Use web3js TransactionInstruction to send the link request. In request, set PDAs
 ```      
 See function addAsChild in hello_mytoken.ts for how linking is done.
 
+---
+
+### Intepret on-chain component data
+Reading a component's state will return the following:
+```
+id;       // component's ID
+description; // component's description
+serial_no; // component's serial no.
+parent;   // component ID of the parent of this component
+children; // an array where each item is component ID of an child
+```
+Note: A component can have only one parent (parent's ID 1 to 255), or no parent (parent's ID 0) at any given time. It can have multiple children (max 10 children at any time)
+
 
 
 
