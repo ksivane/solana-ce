@@ -63,21 +63,23 @@ const PROGRAM_KEYPAIR_PATH = path.join(PROGRAM_PATH, 'hellomytoken-keypair.json'
 class Component {
   opcode = 0;   // u8 as defined in schema
   id = 0;       // u8 as defined in schema
-  // description = 'Some short description of the component';
   description = new Uint8Array(64);
-  // serial_no = 'XXX-YYY-000000';
+  name = new Uint8Array(16);
   serial_no = new Uint8Array(16);
   parent = 0;   // u8
   children = new Uint8Array(10); // only fixed size supported by borsh
+  active = 1;
 
-  constructor(fields: {opcode: number, id: number, description: Uint8Array, serial_no: Uint8Array, parent: number, children: Uint8Array} | undefined = undefined) {
+  constructor(fields: {opcode: number, id: number, description: Uint8Array, name: Uint8Array, serial_no: Uint8Array, parent: number, children: Uint8Array, active: number} | undefined = undefined) {
     if (fields) {
       this.opcode = fields.opcode;
       this.id = fields.id;
       this.description = fields.description;
+      this.name = fields.name;
       this.serial_no = fields.serial_no;
       this.parent = fields.parent;
       this.children = fields.children;
+      this.active = fields.active;
     }
   }
 }
@@ -87,9 +89,11 @@ const ComponentSchema = new Map([
     ['opcode', 'u8'],
     ['id', 'u8'],  // types must match that in program
     ['description', [64]],
+    ['name', [16]],
     ['serial_no', [16]],
     ['parent', 'u8'],
     ['children', [10]],
+    ['active', 'u8'],
   ]}],
 ]);
 
@@ -188,7 +192,7 @@ export async function checkProgram(): Promise<void> {
   console.log(`Using program ${programId.toBase58()}`);
 
   // Derive the address (public key) of a component account from the program so that it's easy to find later.
-  const COMPONENT_SEED_QCOM = 'hello-component-qcom';
+  const COMPONENT_SEED_QCOM = 'component-qcom-1';
   qcom = await PublicKey.createWithSeed(
     payer.publicKey,
     COMPONENT_SEED_QCOM,
@@ -224,7 +228,7 @@ export async function checkProgram(): Promise<void> {
   }
 
   // Derive the address (public key) of a greeting account from the program so that it's easy to find later.
-  const COMPONENT_SEED_NVD = 'hello-component-nvd';
+  const COMPONENT_SEED_NVD = 'component-nvd-1';
   nvd = await PublicKey.createWithSeed(
     payer.publicKey,
     COMPONENT_SEED_NVD,
@@ -258,12 +262,16 @@ export async function checkProgram(): Promise<void> {
     );
     await sendAndConfirmTransaction(connection, transaction, [payer]);
   }
+
+  console.log("Component Qcom PDA: ", qcom.toBase58());
+  console.log("Component Nvd PDA: ", nvd.toBase58());
 }
 
 
 
 
 // QCOM ///////////////////////////////////////////////////////////////////////////////////////
+// Mint
 export async function createComponentQcom(): Promise<void> {
   console.log('Creating component for account:', qcom.toBase58());
 
@@ -271,7 +279,10 @@ export async function createComponentQcom(): Promise<void> {
   this_component.opcode = 100; // u8
   this_component.id = 101; //u8
   this_component.description = new TextEncoder().encode("Mobile CPU (8nm technology), 4 core, 4GB, 16MB cache. Made in SG.".substring(0, 64).padEnd(64,'*')); // len exactly 64bytes
-  this_component.serial_no = new TextEncoder().encode("QPUA-QW-10009".substring(0, 16).padEnd(16,'0')); // len exactly 64bytes
+  this_component.name = new TextEncoder().encode("SnapGodzilla".substring(0, 16).padEnd(16,'*')); // len exactly 16bytes
+  this_component.serial_no = new TextEncoder().encode("QPUA-QW-10009".substring(0, 16).padEnd(16,'0')); // len exactly 16bytes
+  this_component.active = 1;
+  // parent and children array initialized to 0 and program will set it on ledger
   
   let this_component_s = borsh.serialize(
     ComponentSchema,
@@ -291,14 +302,19 @@ export async function createComponentQcom(): Promise<void> {
   console.log("Transaction receipt: ", tx);
 }
 
-
+// Update
 export async function updateComponentQcom(): Promise<void> {
   console.log('Updating component for account:', qcom.toBase58());
 
   let this_component = new Component()
   this_component.opcode = 101; // u8
   this_component.description = new TextEncoder().encode("Mobile CPU (8nm technology), 6 core, 8GB, 16MB cache. Made in SG.".substring(0, 64).padEnd(64,'*')); // len exactly 64bytes
-  // all other fields will be ignored during uodate
+  this_component.name = new TextEncoder().encode("SnapGodzilla-900".substring(0, 16).padEnd(16,'*')); // len exactly 16bytes
+  this_component.serial_no = new TextEncoder().encode("QPUA-QW-10009".substring(0, 16).padEnd(16,'0')); // len exactly 16bytes
+  this_component.active = 1;
+  // parent and children can be updated if needed.
+  // id cant be changed and will be ignored by program
+
 
   let this_component_s = borsh.serialize(
     ComponentSchema,
@@ -319,9 +335,7 @@ export async function updateComponentQcom(): Promise<void> {
 }
 
 
-/**
- * Report the number of times the greeted account has been said hello to
- */
+// Report Qcom state from ledger
 export async function reportComponentQcom(): Promise<void> {
   const accountInfo = await connection.getAccountInfo(qcom);
   if (accountInfo === null) {
@@ -332,6 +346,12 @@ export async function reportComponentQcom(): Promise<void> {
     Component,
     accountInfo.data,
   );
+
+  let res_status = "No";
+  if (component.active == 0) {
+    res_status = "Yes";
+  }
+
   console.log(
     'Account:',
     qcom.toBase58(),
@@ -342,6 +362,9 @@ export async function reportComponentQcom(): Promise<void> {
     'Description:',
     new TextDecoder().decode(component.description),
     '\n',
+    'Name:',
+    new TextDecoder().decode(component.name),
+    '\n',
     'Serial No.:',
     new TextDecoder().decode(component.serial_no),
     '\n',
@@ -350,9 +373,15 @@ export async function reportComponentQcom(): Promise<void> {
     '\n',
     'Children components IDs:',
     component.children,
+    '\n',
+    'Recycled?:',
+    res_status,
+    '\n'
   );
 }
+
 // NVD////////////////////////////////////////////////////////////////////////////////////////
+// Mint
 export async function createComponentNvd(): Promise<void> {
   console.log('Creating component for account:', nvd.toBase58());
 
@@ -360,8 +389,10 @@ export async function createComponentNvd(): Promise<void> {
   this_component.opcode = 100; // u8
   this_component.id = 201; //u8
   this_component.description = new TextEncoder().encode("Integrated GPU, 512 stream cores, 1GB VRAM. Made in TW.".substring(0, 64).padEnd(64,'*')); // len exactly 64bytes
+  this_component.name = new TextEncoder().encode("Einstein".substring(0, 16).padEnd(16,'*')); // len exactly 16bytes
   this_component.serial_no = new TextEncoder().encode("NVD-NN-88-UYTRE".substring(0, 16).padEnd(16,'0')); // len exactly 64bytes
-  
+  this_component.active = 1;
+  // parent and children array initialized to 0 and program will set it on ledger
   
   let this_component_s = borsh.serialize(
     ComponentSchema,
@@ -381,13 +412,18 @@ export async function createComponentNvd(): Promise<void> {
   console.log("Transaction receipt: ", tx);
 }
 
-
+// Update
 export async function updateComponentNvd(): Promise<void> {
   console.log('Updating component for account:', nvd.toBase58());
 
   let this_component = new Component()
   this_component.opcode = 101; // u8
   this_component.description = new TextEncoder().encode("Integrated GPU on chip, 512 stream cores, 1GB VRAM. Made in TW.".substring(0, 64).padEnd(64,'*')); // len exactly 64bytes
+  this_component.name = new TextEncoder().encode("Einstein-1000111".substring(0, 16).padEnd(16,'*')); // len exactly 16bytes
+  this_component.serial_no = new TextEncoder().encode("NVD-NN-88-UYTRE".substring(0, 16).padEnd(16,'0')); // len exactly 16bytes
+  this_component.active = 1;
+  // parent and children can be updated if needed.
+  // id cant be changed and will be ignored by program
   
   let this_component_s = borsh.serialize(
     ComponentSchema,
@@ -408,9 +444,7 @@ export async function updateComponentNvd(): Promise<void> {
 }
 
 
-/**
- * Report the number of times the greeted account has been said hello to
- */
+// Report Nvd state from ledger
 export async function reportComponentNvd(): Promise<void> {
   const accountInfo = await connection.getAccountInfo(nvd);
   if (accountInfo === null) {
@@ -421,6 +455,12 @@ export async function reportComponentNvd(): Promise<void> {
     Component,
     accountInfo.data,
   );
+
+  let res_status = "No";
+  if (component.active == 0) {
+    res_status = "Yes";
+  }
+
   console.log(
     'Account:',
     nvd.toBase58(),
@@ -431,6 +471,9 @@ export async function reportComponentNvd(): Promise<void> {
     'Description:',
     new TextDecoder().decode(component.description),
     '\n',
+    'Name:',
+    new TextDecoder().decode(component.name),
+    '\n',
     'Serial No.:',
     new TextDecoder().decode(component.serial_no),
     '\n',
@@ -439,11 +482,15 @@ export async function reportComponentNvd(): Promise<void> {
     '\n',
     'Children components IDs:',
     component.children,
+    '\n',
+    'Recycled?:',
+    res_status,
+    '\n'
   );
 }
 
 
-// Add QCOM to NVD as child ///////////////////////////////////////////////////////////////////////////////////
+// Link QCOM to NVD as child ///////////////////////////////////////////////////////////////////////////////////
 export async function addAsChild(): Promise<void> {
   console.log("Adding child to parent:");
   console.log('Child:', qcom.toBase58());
@@ -470,3 +517,29 @@ export async function addAsChild(): Promise<void> {
   );
   console.log("Transaction receipt: ", tx);
 }
+
+// Burn Nvd
+export async function burnQcom(): Promise<void> {
+  console.log("Recycling Qcom");
+
+  let this_component = new Component()
+  this_component.opcode = 103; // u8
+  
+  let this_component_s = borsh.serialize(
+    ComponentSchema,
+    this_component,
+  );
+
+  const instruction = new TransactionInstruction({
+    keys: [{pubkey: qcom, isSigner: false, isWritable: true}],
+    programId,
+    data: Buffer.from(this_component_s),
+  });
+  let tx = await sendAndConfirmTransaction(
+    connection,
+    new Transaction().add(instruction),
+    [payer],
+  );
+  console.log("Transaction receipt: ", tx);
+}
+

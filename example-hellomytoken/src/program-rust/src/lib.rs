@@ -13,12 +13,12 @@ use std::str;
 pub struct Component {
     pub opcode: u8,
     pub id: u8,
-    // pub description: String,
     pub description: [u8; 64],
-    // pub serial_no: String,
+    pub name: [u8; 16],
     pub serial_no: [u8; 16],
     pub parent: u8,
     pub children: [u8; 10],
+    pub active: u8,
 }
 
 
@@ -31,7 +31,7 @@ pub fn process_instruction(
     accounts: &[AccountInfo], // The account to say hello to
     instruction_data: &[u8], // Ignored, all hellotoken instructions are hellos
 ) -> ProgramResult {
-    msg!("Hello Token Rust program entrypoint (1)");
+    msg!("Circular Economy (NFTs to track asset lifecycle on Solana ledger)");
 
     // Iterating accounts is safer then indexing
     let accounts_iter = &mut accounts.iter();
@@ -48,40 +48,37 @@ pub fn process_instruction(
     let decoded_component = Component::try_from_slice(instruction_data).unwrap();
     msg!("------------------------- Received ---------------------------");
     msg!("Decoded component: {:?}", decoded_component);
-    // msg!("ID: {}, Description: {:?}", decoded_component.id, decoded_component.description);
-    // msg!("Serial No.: {:?}, Parent: {}", decoded_component.serial_no, decoded_component.parent);
-    // msg!("Children: {:?}", decoded_component.children);
-    // msg!("Opcode: {}", decoded_component.opcode);
     msg!("-------------------------------------------------------------");
 
     match decoded_component.opcode {
         100 => {
-            msg!("Opcode: 100 <Create component>");
+            msg!("Opcode: 100 <Mint component>");
             
             let mut component = Component::try_from_slice(&account.data.borrow())?;
-            
+
+            component.opcode = decoded_component.opcode;            
             component.id = decoded_component.id;
             component.description = decoded_component.description;
+            component.name = decoded_component.name;
             component.serial_no = decoded_component.serial_no;
             component.parent = decoded_component.parent;
             component.children = decoded_component.children;
-            component.opcode = decoded_component.opcode;
+            component.active = 1;
             
             component.serialize(&mut &mut account.data.borrow_mut()[..])?;
-
-            // msg!("-------------------------------------------------------------");
-            // msg!("Created component. ID: {}, Description: {:?}", component.id, component.description);
-            // msg!("Serial No: {:?}, Parent: {}", component.serial_no, component.parent);
-            // msg!("Children: {:?}", component.children);
-            // msg!("Opcode: {}", component.opcode);
-            // msg!("-------------------------------------------------------------");
 
             msg!("------------------------ Component -----------------------------");
             let des = str::from_utf8(&component.description).unwrap();
             let s_no = str::from_utf8(&component.serial_no).unwrap();
+            let nme = str::from_utf8(&component.name).unwrap();
+            let recycled = match component.active {
+                0 => "No",
+                _ =>  "Yes",
+            };
 
-            msg!("Component (ID: {}, Serial No: {})", component.id, s_no);
+            msg!("Component (ID: {}, Serial No: {}, Name: {})", component.id, s_no, nme);
             msg!("Description: {}", des);
+            msg!("In circulation: {}", recycled);
             msg!("Parent component id: {}", component.parent);
             msg!("List of children component ids: {:?}", component.children);
             msg!("-------------------------------------------------------------");
@@ -91,27 +88,29 @@ pub fn process_instruction(
             msg!("Opcode: 101 <Update component>");
             
             let mut component = Component::try_from_slice(&account.data.borrow())?;
-            
+
+            component.opcode = decoded_component.opcode;            
             component.description = decoded_component.description;
+            component.name = decoded_component.name;
+            component.serial_no = decoded_component.serial_no;
             component.parent = decoded_component.parent;
             component.children = decoded_component.children;
-            component.opcode = decoded_component.opcode;
+            component.active = decoded_component.active;
             
             component.serialize(&mut &mut account.data.borrow_mut()[..])?;
-
-            // msg!("-------------------------------------------------------------");
-            // msg!("Created component. ID: {}, Description: {:?}", component.id, component.description);
-            // msg!("Serial No: {:?}, Parent: {}", component.serial_no, component.parent);
-            // msg!("Children: {:?}", component.children);
-            // msg!("Opcode: {}", component.opcode);
-            // msg!("-------------------------------------------------------------");
 
             msg!("------------------------ Component -----------------------------");
             let des = str::from_utf8(&component.description).unwrap();
             let s_no = str::from_utf8(&component.serial_no).unwrap();
+            let nme = str::from_utf8(&component.name).unwrap();
+            let recycled = match component.active {
+                0 => "No",
+                _ =>  "Yes",
+            };
 
-            msg!("Component (ID: {}, Serial No: {})", component.id, s_no);
+            msg!("Component (ID: {}, Serial No: {}, Name: {})", component.id, s_no, nme);
             msg!("Description: {}", des);
+            msg!("In circulation: {}", recycled);
             msg!("Parent component id: {}", component.parent);
             msg!("List of children component ids: {:?}", component.children);
             msg!("-------------------------------------------------------------");
@@ -124,34 +123,28 @@ pub fn process_instruction(
             let account_parent = next_account_info(accounts_iter)?;
             let mut component_parent = Component::try_from_slice(&account_parent.data.borrow())?;
 
-            component_child.parent = component_parent.id;
-            component_parent.children[0] = component_child.id;
-            component_parent.opcode = decoded_component.opcode;
             component_child.opcode = decoded_component.opcode;
+            component_child.parent = component_parent.id;
+
+            component_parent.opcode = decoded_component.opcode;
+            //todo append child instead of always setting first child
+            component_parent.children[0] = component_child.id;
             
             component_child.serialize(&mut &mut account.data.borrow_mut()[..])?;
             component_parent.serialize(&mut &mut account_parent.data.borrow_mut()[..])?;
 
-            // msg!("-------------------------------------------------------------");
-            // msg!("Created component_child. ID: {}, Description: {:?}", component_child.id, component_child.description);
-            // msg!("Serial No: {:?}, Parent: {}", component_child.serial_no, component_child.parent);
-            // msg!("Children: {:?}", component_child.children);
-            // msg!("Opcode: {}", component_child.opcode);
-            // msg!("-------------------------------------------------------------");
-
-            // msg!("-------------------------------------------------------------");
-            // msg!("Created component_parent. ID: {}, Description: {:?}", component_parent.id, component_parent.description);
-            // msg!("Serial No: {:?}, Parent: {}", component_parent.serial_no, component_parent.parent);
-            // msg!("Children: {:?}", component_parent.children);
-            // msg!("Opcode: {}", component_parent.opcode);
-            // msg!("-------------------------------------------------------------");
-
             msg!("------------------------ Component -----------------------------");
             let des = str::from_utf8(&component_parent.description).unwrap();
             let s_no = str::from_utf8(&component_parent.serial_no).unwrap();
+            let nme = str::from_utf8(&component_parent.name).unwrap();
+            let recycled = match component_parent.active {
+                0 => "No",
+                _ =>  "Yes",
+            };
 
-            msg!("Component (ID: {}, Serial No: {})", component_parent.id, s_no);
+            msg!("Component (ID: {}, Serial No: {}, Name: {})", component_parent.id, s_no, nme);
             msg!("Description: {}", des);
+            msg!("In circulation: {}", recycled);
             msg!("Parent component id: {}", component_parent.parent);
             msg!("List of children component ids: {:?}", component_parent.children);
             msg!("-------------------------------------------------------------");
@@ -159,11 +152,45 @@ pub fn process_instruction(
             msg!("------------------------ Component -----------------------------");
             let des = str::from_utf8(&component_child.description).unwrap();
             let s_no = str::from_utf8(&component_child.serial_no).unwrap();
+            let nme = str::from_utf8(&component_parent.name).unwrap();
+            let recycled = match component_child.active {
+                0 => "No",
+                _ =>  "Yes",
+            };
 
-            msg!("Component (ID: {}, Serial No: {})", component_child.id, s_no);
+            msg!("Component (ID: {}, Serial No: {}, Name: {})", component_child.id, s_no, nme);
             msg!("Description: {}", des);
+            msg!("In circulation: {}", recycled);
             msg!("Parent component id: {}", component_child.parent);
             msg!("List of children component ids: {:?}", component_child.children);
+            msg!("-------------------------------------------------------------");
+        }
+
+        103 => {
+            msg!("Opcode: 103 <Burn component>");
+            
+            let mut component = Component::try_from_slice(&account.data.borrow())?;
+
+            component.opcode = decoded_component.opcode;            
+            component.active = 0;
+            // last known parent and children are preserved
+            
+            component.serialize(&mut &mut account.data.borrow_mut()[..])?;
+
+            msg!("------------------------ Component -----------------------------");
+            let des = str::from_utf8(&component.description).unwrap();
+            let s_no = str::from_utf8(&component.serial_no).unwrap();
+            let nme = str::from_utf8(&component.name).unwrap();
+            let recycled = match component.active {
+                0 => "No",
+                _ =>  "Yes",
+            };
+
+            msg!("Component (ID: {}, Serial No: {}, Name: {})", component.id, s_no, nme);
+            msg!("Description: {}", des);
+            msg!("In circulation: {}", recycled);
+            msg!("Parent component id: {}", component.parent);
+            msg!("List of children component ids: {:?}", component.children);
             msg!("-------------------------------------------------------------");
         }
 
