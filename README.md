@@ -1,7 +1,20 @@
-# solana-ce
-Solana hackathon
+# Solana hackathon
 
 # Circular Economy
+We have developed a POC to solve the problem of asset tracking and provenance using Solana blockchain as a global distributed ledger. 
+
+## Concept
+NFTs (Non fungible tokens) are used as on-chain represention of real-world entities, such as a paiting or limited edition sneekers. We take inspiration from Ethereum ERC721 NFT standard and use NFTs as on-chain represention of physical entities on the global supply chain. Example of such entities include Cpu chips, memory modules, LCD panels, Printed circuit boards (PCB) etc.
+
+We have also added capability to represent relationship among NFTs to accurately real-world scnarios. Example, a PCB component contains many sub-components like Cpus, RAM modules etc. The PCB component itself maybe combined with others to creat a final product such as a smartphone. Our Solana program (Smart contract) allows such relationships to be created or destroyed as components go through various stages of thier life cycle.
+
+We also capture the key tenants of the Circular Economy:
+- Reduce
+- Reuse
+- Re-productize
+- Recycle
+as operations on the NFTs
+
 ## Frontend and Program(Smart contract) interaction
 
 ### Initialization
@@ -87,6 +100,7 @@ parent;   // component ID of the parent of this component
 children; // an array where each item is component ID of an child
 ```
 Note: A component can have only one parent (parent's ID 1 to 255), or no parent (parent's ID 0) at any given time. It can have multiple children (max 10 children at any time)
+
 
 
 
