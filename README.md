@@ -1,19 +1,20 @@
-# Solana hackathon
-
-# Circular Economy
+# Solana hackathon (Circular Economy)
 We have developed a POC to solve the problem of asset tracking and provenance using Solana blockchain as a global distributed ledger. 
 
 ## Concept
-NFTs (Non fungible tokens) are used as on-chain represention of real-world entities, such as a paiting or limited edition sneekers. We take inspiration from Ethereum ERC721 NFT standard and use NFTs as on-chain represention of physical entities on the global supply chain. Example of such entities include Cpu chips, memory modules, LCD panels, Printed circuit boards (PCB) etc.
+NFTs (Non fungible tokens) are used as on-chain represention of real-world entities such as a paintings or limited edition sneekers. We take inspiration from Ethereum ERC721 NFT standard and use NFTs as on-chain represention of physical entities on the global supply chain. Example of such entities include Cpu chips, memory modules, LCD panels, Printed circuit boards (PCB) etc.
 
-We have also added capability to represent relationship among NFTs to accurately real-world scnarios. Example, a PCB component contains many sub-components like Cpus, RAM modules etc. The PCB component itself maybe combined with others to creat a final product such as a smartphone. Our Solana program (Smart contract) allows such relationships to be created or destroyed as components go through various stages of thier life cycle.
+We have also added capability to represent relationship among NFTs to accurately model real-world scenarios. For example, a PCB component contains many sub-components like Cpus, RAM modules etc. The PCB component itself maybe combined with others to create a final product such as a smartphone. Our Solana program (Smart contract) allows such relationships to be created or destroyed as components go through various stages of thier life cycle.
 
-We also capture the key tenants of the Circular Economy:
-- Reduce
-- Reuse
-- Re-productize
-- Recycle
-as operations on the NFTs
+We capture the key tenets of the Circular Economy as operations on the NFTs:
+
+| Circular economy tenet | Program instruction on-chain |
+| ---------------------  | ---------------------------- |
+| Reduce | NFT Mint |
+| Reuse | NFT history |
+| Re-productize | NFT Relationship |
+| Recycle | NFT burn |
+
 
 ## Frontend and Program(Smart contract) interaction
 
