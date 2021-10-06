@@ -102,6 +102,11 @@ children; // an array where each item is component ID of an child
 ```
 Note: A component can have only one parent (parent's ID 1 to 255), or no parent (parent's ID 0) at any given time. It can have multiple children (max 10 children at any time)
 
+### TODO
+- Ownership model
+- Biz model (Foundational service where manufactrurers connect to)
+- Loan, green rating scoring etc.
+
 
 
 
