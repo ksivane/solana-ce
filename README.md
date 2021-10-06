@@ -23,7 +23,7 @@ To mint a component
   - Component ID (1 to 255)
   - Description (10 to 64 chars)
   - Serial no. (5 to 16 chars)
-- Parameters set by client: 
+- Parameters set by client code: 
   - Set opcode to 100
   - Set parent to 0
   - Initialize children array to all 0
@@ -31,5 +31,16 @@ To mint a component
 Use web3js TransactionInstruction to send the mint request. In request, set pubkey to PDA of the respective component.
 See Class Component in hello_mytoken.js for how component data structure is typed. Note that types (e.g uint8) and string lengths have to be excatly maintained. 
 See function createComponentQcom in hello_mytoken.ts for how minting is done.
+
+Each minted component can be updated. e.g. changing the component description.
+- Demo does not need this function. So ignore.
+
+Each component's state can be read from Solana
+To read a component's state:
+Use web3js getAccountInfo to send the read request. In request, use PDA of the respective component.
+See function reportComponentQcom in hello_mytoken.ts for how this is done.
+
+
+
 
 
