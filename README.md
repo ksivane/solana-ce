@@ -30,7 +30,7 @@ We capture the key tenets of the Circular Economy as operations on the NFTs:
 #### Pre-requisites (to be generated at init time)
 - For each component (e.g. LED-display, Pcb, Phone etc.), an address called PDA (Program derived address) has to be created and registsred on Solana. This PDA will be used as the address of the component when component is minted on Solana.
   - **For each component, use a different seed to derive unique PDAs.**
-  - See code lines 191 - 224 in hello_mytoken.ts on how PDAs are generated and regsistered with Solana.
+  - See code lines 195 - 267 in hello_mytoken.ts on how PDAs are generated and regsistered with Solana.
 - Once PDAs are registsred, maintain a mapping of component_id <-> PDA in frontend state. Use this mapping to retrieve PDA of a component from its ID.
   - e.g. <component_id:PDA> (100: CojemWZsWiYng8vd7ghVeUWaz5MsNkRygosbdaEBouwv, 200: ByUBFLZKWo6xCv5w3m5vaF9ioUyuQJfi6CR94kvhPxGc)
 
