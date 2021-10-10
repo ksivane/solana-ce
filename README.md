@@ -2,7 +2,7 @@
 We have developed a POC to solve the problem of asset tracking and provenance using Solana blockchain as a global distributed ledger. 
 
 ## Concept
-NFTs (Non fungible tokens) are used as on-chain represention of real-world entities such as a paintings or limited edition sneekers. We take inspiration from Ethereum ERC721 NFT standard and use NFTs as on-chain represention of physical entities on the global supply chain. Example of such entities include Cpu chips, memory modules, LCD panels, Printed circuit boards (PCB) etc.
+NFTs (Non fungible tokens) are used as on-chain represention of real-world entities such as paintings or limited-edition sneekers. We take inspiration from Ethereum ERC721 NFT standard and use NFTs as on-chain represention of physical entities on the global supply chain. Example of such entities include Cpu chips, memory modules, LCD panels, Printed circuit boards (PCB) etc.
 
 We have also added capability to represent relationship among NFTs to accurately model real-world scenarios. For example, a PCB component contains many sub-components like Cpus, RAM modules etc. The PCB component itself maybe combined with others to create a final product such as a smartphone. Our Solana program (Smart contract) allows such relationships to be created or destroyed as components go through various stages of thier life cycle.
 
@@ -30,7 +30,7 @@ We capture the key tenets of the Circular Economy as operations on the NFTs:
 #### Pre-requisites (to be generated at init time)
 - For each component (e.g. LED-display, Pcb, Phone etc.), an address called PDA (Program derived address) has to be created and registsred on Solana. This PDA will be used as the address of the component when component is minted on Solana.
   - **For each component, use a different seed to derive unique PDAs.**
-  - See code lines 191 - 224 in hello_mytoken.ts on how PDAs are generated and regsistered with Solana.
+  - See code lines 195 - 267 in hello_mytoken.ts on how PDAs are generated and regsistered with Solana.
 - Once PDAs are registsred, maintain a mapping of component_id <-> PDA in frontend state. Use this mapping to retrieve PDA of a component from its ID.
   - e.g. <component_id:PDA> (100: CojemWZsWiYng8vd7ghVeUWaz5MsNkRygosbdaEBouwv, 200: ByUBFLZKWo6xCv5w3m5vaF9ioUyuQJfi6CR94kvhPxGc)
 
@@ -42,6 +42,7 @@ For each component to be minted on Solana:
 - Parameters input by user:
   - Component ID (1 to 255)
   - Description (10 to 64 chars)
+  - Name (5 to 16 chars)
   - Serial no. (5 to 16 chars)
 - Parameters set by client code: 
   - Set opcode to 100
@@ -51,11 +52,13 @@ See Class Component in hello_mytoken.js for how component data structure is type
 See function createComponentQcom in hello_mytoken.ts for how minting is done.
 
 #### Update a component
-Each minted component can be updated. Only component's description can be updated as of now.
+Each minted component can be updated. Note, component's ID cant be updated on-chain.
 For each component to be updated on Solana:
 - Parameters input by user:
   - Component ID (1 to 255)
   - New description (10 to 64 chars)
+  - Name (5 to 16 chars)
+  - Serial no. (5 to 16 chars)
 - Parameters set by client code: 
   - Set opcode to 101
 
@@ -88,6 +91,17 @@ Use web3js TransactionInstruction to send the link request. In request, set PDAs
       {pubkey: <PDA-of-parent-component>, isSigner: false, isWritable: true}],
 ```      
 See function addAsChild in hello_mytoken.ts for how linking is done.
+
+#### Burn a component
+Component is burnt when its recycled into raw materials.
+For component to be burnt on Solana:
+- Parameters input by user:
+  - Component ID (1 to 255)
+- Parameters set by client code: 
+  - Set opcode to 103
+
+Use web3js TransactionInstruction to send the burn request. In request, set pubkey to PDA (retrieve from component_id:PDA mapping) of the respective component.
+See function burnQcom in hello_mytoken.ts for how burn is done.
 
 ---
 
