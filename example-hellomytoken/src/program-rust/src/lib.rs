@@ -127,8 +127,12 @@ pub fn process_instruction(
             component_child.parent = component_parent.id;
 
             component_parent.opcode = decoded_component.opcode;
-            //todo append child instead of always setting first child
-            component_parent.children[0] = component_child.id;
+            for child_id in component_parent.children.iter_mut() {
+                if *child_id == 0 {
+                    *child_id = component_child.id;
+                    break;
+                }
+            }
             
             component_child.serialize(&mut &mut account.data.borrow_mut()[..])?;
             component_parent.serialize(&mut &mut account_parent.data.borrow_mut()[..])?;

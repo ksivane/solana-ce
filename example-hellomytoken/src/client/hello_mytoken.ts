@@ -192,7 +192,7 @@ export async function checkProgram(): Promise<void> {
   console.log(`Using program ${programId.toBase58()}`);
 
   // Derive the address (public key) of a component account from the program so that it's easy to find later.
-  const COMPONENT_SEED_QCOM = 'component-qcom-1';
+  const COMPONENT_SEED_QCOM = 'component-qcom-4';
   qcom = await PublicKey.createWithSeed(
     payer.publicKey,
     COMPONENT_SEED_QCOM,
@@ -228,7 +228,7 @@ export async function checkProgram(): Promise<void> {
   }
 
   // Derive the address (public key) of a greeting account from the program so that it's easy to find later.
-  const COMPONENT_SEED_NVD = 'component-nvd-1';
+  const COMPONENT_SEED_NVD = 'component-nvd-4';
   nvd = await PublicKey.createWithSeed(
     payer.publicKey,
     COMPONENT_SEED_NVD,
